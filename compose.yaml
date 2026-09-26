@@ -1,0 +1,83 @@
+services:
+  database:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: e_comme
+      MYSQL_USER: e_comme
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-e_comme_local}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-e_comme_root_local}
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - e_comme_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build:
+      context: ./e-comme
+    restart: unless-stopped
+    env_file:
+      - ./e-comme/.env
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8001
+      FRONTEND_URL: http://localhost:3001
+      DB_CONNECTION: mysql
+      DB_HOST: database
+      DB_PORT: 3306
+      DB_DATABASE: e_comme
+      DB_USERNAME: e_comme
+      DB_PASSWORD: ${MYSQL_PASSWORD:-e_comme_local}
+      DB_URL: mysql://e_comme:e_comme_local@database:3306/e_comme
+      SESSION_DRIVER: file
+      CACHE_STORE: file
+      QUEUE_CONNECTION: sync
+    ports:
+      - "127.0.0.1:8001:8000"
+    volumes:
+      - ./e-comme:/var/www/html
+      - laravel_vendor:/var/www/html/vendor
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "php -r '$$socket = @fsockopen(\"127.0.0.1\", 8000); exit($$socket ? 0 : 1);'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    command: ["sh", "-c", "composer install --no-interaction --prefer-dist && php artisan config:clear && php artisan serve --host=0.0.0.0 --port=8000"]
+
+  frontend:
+    build:
+      context: ./e-commefront
+    restart: unless-stopped
+    env_file:
+      - ./e-commefront/.env
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:8001/api
+      API_INTERNAL_URL: http://backend:8000/api
+      NEXT_TELEMETRY_DISABLED: "1"
+    ports:
+      - "127.0.0.1:3001:3000"
+    volumes:
+      - ./e-commefront:/app
+      - frontend_node_modules:/app/node_modules
+      - frontend_next:/app/.next
+    depends_on:
+      backend:
+        condition: service_healthy
+    command: ["sh", "-c", "pnpm install --frozen-lockfile && pnpm dev --hostname 0.0.0.0"]
+
+volumes:
+  e_comme_mysql_data:
+  laravel_vendor:
+  frontend_node_modules:
+  frontend_next:
