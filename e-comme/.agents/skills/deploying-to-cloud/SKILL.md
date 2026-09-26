@@ -15,7 +15,6 @@ Use the [Laravel Cloud documentation](https://cloud.laravel.com/docs/llms.txt) f
 - Laravel Cloud deploys from GitHub, GitLab, or Bitbucket. A new Laravel application requires PHP 8.2 or later, Laravel 9 or later, a connected Git provider, and a deployment region.
 - Cloud creates environments for applications. Use separate production, staging, and preview environments; each environment has its own compute, resources, and deployment settings.
 - Keep application compute and attached resources in the same region where possible.
-- Cloud builds a Docker image using the selected PHP version, runs the configured build and deploy commands, and switches traffic to a successful deployment with zero downtime. Push-to-deploy is enabled by default, and manual deployments and deploy hooks are also available.
 
 ## Build and Deploy
 

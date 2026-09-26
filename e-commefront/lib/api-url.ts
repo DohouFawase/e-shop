@@ -1,4 +1,4 @@
-/** URL Laravel utilisable depuis le navigateur ou depuis le réseau Docker. */
+/** Sélectionne l’URL API adaptée au contexte navigateur ou serveur. */
 const browserApiUrl = process.env.NEXT_PUBLIC_API_URL;
 const serverApiUrl =
   typeof window === "undefined" ? process.env.API_INTERNAL_URL : undefined;
