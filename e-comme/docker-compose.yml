@@ -24,7 +24,11 @@ services:
       CACHE_STORE: database
       QUEUE_CONNECTION: database
     volumes:
-      - laravel_storage:/var/www/html/storage
+      - type: volume
+        source: laravel_storage
+        target: /var/www/html/storage
+        volume:
+          nocopy: true
     depends_on:
       database:
         condition: service_healthy
@@ -52,7 +56,11 @@ services:
       CACHE_STORE: database
       QUEUE_CONNECTION: database
     volumes:
-      - laravel_storage:/var/www/html/storage
+      - type: volume
+        source: laravel_storage
+        target: /var/www/html/storage
+        volume:
+          nocopy: true
     depends_on:
       database:
         condition: service_healthy
@@ -80,7 +88,11 @@ services:
       CACHE_STORE: database
       QUEUE_CONNECTION: database
     volumes:
-      - laravel_storage:/var/www/html/storage
+      - type: volume
+        source: laravel_storage
+        target: /var/www/html/storage
+        volume:
+          nocopy: true
     depends_on:
       database:
         condition: service_healthy
