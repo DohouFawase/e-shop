@@ -11,12 +11,12 @@ use Illuminate\Support\Facades\Route;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         channels: __DIR__.'/../routes/channels.php',
-        web: __DIR__ . '/../routes/web.php',
-        api: __DIR__ . '/../routes/api.php',
-        commands: __DIR__ . '/../routes/console.php',
+        web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
+        commands: __DIR__.'/../routes/console.php',
 
         health: '/up',
-        using: function () {
+        then: function () {
             Route::middleware('api')
                 ->prefix('api')
                 ->group(base_path('routes/v1/auth.php'))
@@ -31,11 +31,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->group(base_path('routes/v1/review.php'))
                 ->group(base_path('routes/v1/notif.php'))
                 ->group(base_path('routes/v1/profile.php'))
-                ->group(base_path('routes/v1/contact.php'))
-                ->group(base_path('routes/api.php'));
+                ->group(base_path('routes/v1/contact.php'));
 
-            Route::middleware('web')
-                ->group(base_path('routes/web.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
@@ -47,6 +44,6 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
-            fn(Request $request) => $request->is('api/*') || $request->expectsJson(),
+            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
     })->create();
