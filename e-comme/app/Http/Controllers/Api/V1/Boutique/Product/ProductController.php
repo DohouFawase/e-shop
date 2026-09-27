@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Boutique\Product\CreateProductFormRequest;
 use App\Http\Requests\Boutique\Product\UpdateProductFormRequest;
 use App\Repositories\Contracts\Products\ProductRepositoryInterface;
+use App\Services\Images\PublicImageOptimizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -16,10 +17,12 @@ class ProductController extends Controller
     //
 
     protected $productRepository;
+    protected PublicImageOptimizer $imageOptimizer;
 
-    public function __construct(ProductRepositoryInterface $productRepository)
+    public function __construct(ProductRepositoryInterface $productRepository, PublicImageOptimizer $imageOptimizer)
     {
         $this->productRepository = $productRepository;
+        $this->imageOptimizer = $imageOptimizer;
     }
 
     private function productFilters(Request $request): array
@@ -98,7 +101,7 @@ class ProductController extends Controller
 
             if ($request->hasFile('images')) {
                 $data['images'] = array_map(
-                    fn($file) => $file->store('products', 'public'),
+                    fn($file) => $this->imageOptimizer->storeUpload($file, 'products'),
                     $request->file('images')
                 );
             }
@@ -139,7 +142,7 @@ class ProductController extends Controller
                     }
                 }
                 $data['images'] = array_map(
-                    fn($file) => $file->store('products', 'public'),
+                    fn($file) => $this->imageOptimizer->storeUpload($file, 'products'),
                     $request->file('images')
                 );
             }

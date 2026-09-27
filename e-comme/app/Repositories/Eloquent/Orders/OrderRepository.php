@@ -57,6 +57,8 @@ class OrderRepository implements OrderRepositoryInterface
                 'shipping_address' => $data['shipping_address'],
                 'phone' => $data['phone'],
                 'notes' => $data['notes'] ?? null,
+                'sales_terms_accepted_at' => now(),
+                'sales_terms_version' => config('legal.sales_terms_version'),
             ]);
 
             foreach ($cart->items as $item) {

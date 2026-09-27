@@ -5,6 +5,7 @@ import { StorefrontAccessGuard } from "@/components/shop/StorefrontAccessGuard";
 import { StorefrontMotion } from "@/components/shop/StorefrontMotion";
 import { StorefrontNavigationLoader } from "@/components/shop/StorefrontNavigationLoader";
 import { Toaster } from "sonner";
+import { CookieConsentBanner } from "@/components/legal/CookieConsentBanner";
 
 export const metadata: Metadata = {
   title: { default: "Accueil", template: "%s | Naya" },
@@ -18,6 +19,7 @@ export default function StorefrontLayout({ children }: LayoutProps<"/">) {
         <StorefrontMotion />
         <StorefrontNavigationLoader />
         <SiteHeader />
+        <CookieConsentBanner />
         <div id="storefront-smooth-wrapper">
           <div id="storefront-smooth-content">
             <main className="flex-1">{children}</main>

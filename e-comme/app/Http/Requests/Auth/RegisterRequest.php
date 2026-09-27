@@ -31,6 +31,8 @@ class RegisterRequest extends FormRequest
             'timezone' => ['nullable', 'timezone'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'password' => ['required', 'confirmed', Password::min(8)->letters()->numbers()],
+            'terms_accepted' => ['required', 'accepted'],
+            'privacy_notice_acknowledged' => ['required', 'accepted'],
         ];
     }
 

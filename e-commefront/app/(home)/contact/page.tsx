@@ -22,6 +22,7 @@ export default function ContactPage() {
         email: String(values.get("email") ?? ""),
         subject: String(values.get("subject") ?? ""),
         message: String(values.get("message") ?? ""),
+        privacy_notice_acknowledged: values.get("privacy_notice_acknowledged") === "on",
       })).unwrap();
       form.reset();
       setSent(true);
@@ -67,6 +68,7 @@ export default function ContactPage() {
               </div>
               <label htmlFor="contact-subject" className="block text-xs font-medium text-zinc-700">Sujet<select id="contact-subject" name="subject" defaultValue="Question sur un produit" className="mt-2 h-12 w-full border border-zinc-900/15 bg-white px-3 text-sm outline-none focus:border-zinc-500"><option>Question sur un produit</option><option>Question sur une commande</option><option>Livraison et paiement</option><option>Autre demande</option></select></label>
               <label htmlFor="contact-message" className="block text-xs font-medium text-zinc-700">Votre message<textarea id="contact-message" name="message" required minLength={10} maxLength={5000} rows={6} className="mt-2 block w-full resize-y border border-zinc-900/15 bg-white px-3 py-3 text-sm outline-none focus:border-zinc-500" placeholder="Décrivez-nous votre demande…" /></label>
+              <label className="flex items-start gap-2 text-xs leading-5 text-zinc-600"><input name="privacy_notice_acknowledged" type="checkbox" required className="mt-1 accent-zinc-900" /><span>J’ai lu la <Link href="/privacy" className="underline underline-offset-2">politique de confidentialité</Link>. Mes coordonnées seront utilisées pour traiter et répondre à cette demande.</span></label>
               <button type="submit" disabled={status === "loading"} className="group inline-flex h-12 w-full items-center justify-center gap-3 bg-zinc-950 px-5 text-xs font-semibold uppercase tracking-[0.13em] text-white transition hover:bg-zinc-700 disabled:cursor-wait disabled:opacity-50 sm:w-auto sm:px-8">{status === "loading" ? "Envoi en cours…" : "Envoyer le message"}{status === "loading" ? <span className="size-4 animate-spin rounded-full border-2 border-white/40 border-t-white" /> : <ArrowRight className="size-4 transition group-hover:translate-x-1" />}</button>
               <p className="flex items-start gap-2 text-[10px] leading-5 text-zinc-500"><MessageCircle className="mt-0.5 size-3.5 shrink-0" />Votre message est transmis de façon sécurisée et utilisé uniquement pour répondre à votre demande.</p>
             </form>

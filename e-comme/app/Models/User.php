@@ -12,7 +12,7 @@ use Illuminate\Notifications\Notifiable;
 use NotificationChannels\WebPush\HasPushSubscriptions;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-#[Fillable(['email', 'password', 'first_name', 'last_name', 'phone', 'location', 'timezone'])]
+#[Fillable(['email', 'password', 'first_name', 'last_name', 'phone', 'location', 'timezone', 'terms_accepted_at', 'terms_version', 'privacy_notice_acknowledged_at', 'privacy_version'])]
 #[Hidden(['password', 'remember_token', 'is_admin'])]
 class User extends Authenticatable implements \Illuminate\Contracts\Auth\MustVerifyEmail, JWTSubject
 {
@@ -34,6 +34,8 @@ class User extends Authenticatable implements \Illuminate\Contracts\Auth\MustVer
         return [
             'email_verified_at' => 'datetime',
             'last_login_at' => 'datetime',
+            'terms_accepted_at' => 'datetime',
+            'privacy_notice_acknowledged_at' => 'datetime',
             'password' => 'hashed',
         ];
     }

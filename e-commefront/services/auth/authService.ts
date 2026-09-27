@@ -24,6 +24,8 @@ export interface RegisterPayload {
   password_confirmation: string;
   location?: string;
   timezone?: string;
+  terms_accepted: boolean;
+  privacy_notice_acknowledged: boolean;
 }
 
 export interface PasswordResetPayload {

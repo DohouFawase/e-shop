@@ -20,8 +20,12 @@ class ContactController extends Controller
             'email' => ['required', 'email:rfc', 'max:255'],
             'subject' => ['required', 'string', 'max:150'],
             'message' => ['required', 'string', 'min:10', 'max:5000'],
+            'privacy_notice_acknowledged' => ['required', 'accepted'],
         ]);
 
+        unset($data['privacy_notice_acknowledged']);
+        $data['privacy_notice_acknowledged_at'] = now();
+        $data['privacy_version'] = config('legal.privacy_version');
         $contactMessage = ContactMessage::create($data);
 
         // The database inbox is the source of truth; mail is a notification channel only.

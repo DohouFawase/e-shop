@@ -13,8 +13,9 @@ RUN npm run build
 FROM php:8.4-apache-bookworm AS php-base
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libicu-dev libsqlite3-dev libzip-dev \
-    && docker-php-ext-install -j"$(nproc)" bcmath intl pdo_mysql pdo_sqlite zip opcache \
+    && apt-get install -y --no-install-recommends libicu-dev libsqlite3-dev libzip-dev libjpeg62-turbo-dev libpng-dev libwebp-dev \
+    && docker-php-ext-configure gd --with-jpeg --with-webp \
+    && docker-php-ext-install -j"$(nproc)" bcmath gd intl pdo_mysql pdo_sqlite zip opcache \
     && a2enmod rewrite headers \
     && rm -rf /var/lib/apt/lists/*
 

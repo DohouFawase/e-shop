@@ -1,4 +1,5 @@
 import { api } from "@/config/config";
+import { hasAnalyticsConsent } from "@/lib/cookie-consent";
 
 const VISITOR_COOKIE = "naya_visitor_id";
 const visitorIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -12,7 +13,7 @@ function createUuid() {
 }
 
 export function getVisitorId() {
-  if (typeof document === "undefined") return null;
+  if (typeof document === "undefined" || !hasAnalyticsConsent()) return null;
   const existing = document.cookie.split(";").map((part) => part.trim()).find((part) => part.startsWith(`${VISITOR_COOKIE}=`))?.split("=").slice(1).join("=");
   if (existing && visitorIdPattern.test(existing)) return existing;
 

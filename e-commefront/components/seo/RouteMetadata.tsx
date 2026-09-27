@@ -28,6 +28,26 @@ const pages: Record<string, PageMetadata> = {
     title: "Contact",
     description: "Contactez l’équipe Naya pour toute question ou demande d’information.",
   },
+  "/legal-notice": {
+    title: "Mentions légales",
+    description: "Informations légales relatives à la boutique Naya.",
+  },
+  "/terms": {
+    title: "Conditions d’utilisation",
+    description: "Conditions générales d’utilisation de la boutique Naya.",
+  },
+  "/sales-terms": {
+    title: "Conditions générales de vente",
+    description: "Conditions de commande, paiement et livraison chez Naya.",
+  },
+  "/privacy": {
+    title: "Politique de confidentialité",
+    description: "Comment Naya collecte et utilise les données personnelles.",
+  },
+  "/cookies": {
+    title: "Cookies et préférences",
+    description: "Informations sur les cookies et gestion des préférences.",
+  },
   "/account": {
     title: "Mon compte",
     description: "Gérez vos coordonnées, votre profil et les paramètres de votre compte Naya.",

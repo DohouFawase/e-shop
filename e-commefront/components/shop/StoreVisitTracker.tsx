@@ -13,15 +13,19 @@ export function StoreVisitTracker() {
   const authStatus = useAppSelector((state) => state.auth.status);
 
   useEffect(() => {
-    const hasToken = Boolean(getAccessToken());
-    if (user?.is_admin) return;
-    if (hasToken && (authStatus === "idle" || authStatus === "loading")) return;
-
-    const visitorId = getVisitorId();
-    if (!visitorId) return;
-    void visitorTrackingService.trackPageView(visitorId, pathname).catch(() => {
-      // Le suivi ne doit jamais bloquer la navigation dans la boutique.
-    });
+    const track = () => {
+      const hasToken = Boolean(getAccessToken());
+      if (user?.is_admin) return;
+      if (hasToken && (authStatus === "idle" || authStatus === "loading")) return;
+      const visitorId = getVisitorId();
+      if (!visitorId) return;
+      void visitorTrackingService.trackPageView(visitorId, pathname).catch(() => {
+        // Le suivi ne doit jamais bloquer la navigation dans la boutique.
+      });
+    };
+    track();
+    window.addEventListener("naya:analytics-consent-updated", track);
+    return () => window.removeEventListener("naya:analytics-consent-updated", track);
   }, [authStatus, pathname, user]);
 
   return null;

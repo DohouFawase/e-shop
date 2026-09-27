@@ -27,6 +27,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("cinetpay");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [salesTermsAccepted, setSalesTermsAccepted] = useState(false);
 
   useEffect(() => {
     if (user && !cart && cartStatus === "idle") void dispatch(fetchCart());
@@ -42,6 +43,7 @@ export default function CheckoutPage() {
         phone,
         notes: notes.trim() || null,
         payment_method: paymentMethod,
+        sales_terms_accepted: true,
       });
 
       if (paymentMethod === "cinetpay") {
@@ -177,6 +179,7 @@ export default function CheckoutPage() {
             <p className="text-xs leading-5 text-zinc-500">Les frais de livraison et taxes éventuelles seront précisés lors de la confirmation de la commande.</p>
           </div>
           <div className="flex justify-between gap-4 py-5 text-sm font-semibold"><span className="uppercase">Total estimé</span><span>{formatPrice(cart.total)}</span></div>
+          <label className="mb-4 flex items-start gap-2 text-xs leading-5 text-zinc-600"><input type="checkbox" required checked={salesTermsAccepted} onChange={(event) => setSalesTermsAccepted(event.target.checked)} className="mt-1 accent-zinc-900" /><span>J’accepte les <Link href="/sales-terms" className="underline underline-offset-2">conditions générales de vente</Link> et j’ai lu la <Link href="/privacy" className="underline underline-offset-2">politique de confidentialité</Link>.</span></label>
           {error && <p role="alert" className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p>}
           <button type="submit" disabled={busy || cartStatus === "loading"} className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-zinc-900 px-6 py-4 text-sm font-medium uppercase text-white transition hover:bg-zinc-700 disabled:cursor-wait disabled:opacity-50">
             {busy ? <><LoaderCircle className="size-4 animate-spin" />Préparation…</> : paymentMethod === "cinetpay" ? "Continuer vers le paiement" : "Confirmer la commande"}

@@ -22,6 +22,10 @@ class AuthRepository implements AuthRepositoryInterface
             // 'location' => $data['location'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'terms_accepted_at' => now(),
+            'terms_version' => config('legal.terms_version'),
+            'privacy_notice_acknowledged_at' => now(),
+            'privacy_version' => config('legal.privacy_version'),
         ]);
 
         event(new Registered($user));

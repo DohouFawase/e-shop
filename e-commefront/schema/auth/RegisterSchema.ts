@@ -51,6 +51,7 @@ export const registerFormSchema = z
       .refine((value) => value === true, {
         message: "Vous devez accepter les conditions d'utilisation",
       }),
+    privacyNoticeAcknowledged: z.boolean().refine((value) => value === true, { message: "Vous devez confirmer avoir lu la politique de confidentialité" }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Les mots de passe ne correspondent pas",

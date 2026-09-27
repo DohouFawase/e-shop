@@ -23,18 +23,19 @@ export default function SignUpPage() {
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterFormInputs>({
     resolver: zodResolver(registerFormSchema),
     mode: "onBlur",
-    defaultValues: { email: "", first_name: "", last_name: "", phone: "", password: "", confirmPassword: "", terms: false },
+    defaultValues: { email: "", first_name: "", last_name: "", phone: "", password: "", confirmPassword: "", terms: false, privacyNoticeAcknowledged: false },
   });
 
   async function onSubmit(data: RegisterFormInputs) {
-    const { confirmPassword, terms, ...userData } = data;
-    void terms;
+    const { confirmPassword, terms, privacyNoticeAcknowledged, ...userData } = data;
     setSubmitError(null);
     try {
       await dispatch(registerUser({
         ...userData,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Africa/Abidjan",
         password_confirmation: confirmPassword,
+        terms_accepted: terms,
+        privacy_notice_acknowledged: privacyNoticeAcknowledged,
       })).unwrap();
       router.replace("/");
     } catch (error) {
@@ -62,8 +63,10 @@ export default function SignUpPage() {
       </div>
       <label htmlFor="password" className="block text-xs font-medium text-zinc-700">Mot de passe<span className="relative mt-2 block"><input id="password" type={showPassword ? "text" : "password"} autoComplete="new-password" {...register("password")} placeholder="8 caractères minimum" aria-invalid={Boolean(errors.password)} className={`${inputClass} pr-12 ${errors.password ? "border-rose-500" : "border-zinc-900/15"}`} /><button type="button" onClick={() => setShowPassword((value) => !value)} aria-label={showPassword ? "Masquer le mot de passe" : "Afficher le mot de passe"} className="absolute inset-y-0 right-0 grid w-12 place-items-center text-zinc-500">{showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}</button></span>{fieldError("password") && <span className="mt-1 block text-xs text-rose-700">{fieldError("password")}</span>}</label>
       <label htmlFor="confirmPassword" className="block text-xs font-medium text-zinc-700">Confirmer le mot de passe<span className="relative mt-2 block"><input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} autoComplete="new-password" {...register("confirmPassword")} placeholder="Saisissez-le à nouveau" aria-invalid={Boolean(errors.confirmPassword)} className={`${inputClass} pr-12 ${errors.confirmPassword ? "border-rose-500" : "border-zinc-900/15"}`} /><button type="button" onClick={() => setShowConfirmPassword((value) => !value)} aria-label={showConfirmPassword ? "Masquer la confirmation" : "Afficher la confirmation"} className="absolute inset-y-0 right-0 grid w-12 place-items-center text-zinc-500">{showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}</button></span>{fieldError("confirmPassword") && <span className="mt-1 block text-xs text-rose-700">{fieldError("confirmPassword")}</span>}</label>
-      <label className="flex items-start gap-2 text-xs leading-5 text-zinc-600"><input type="checkbox" {...register("terms")} className="mt-1 accent-zinc-900" /><span>J’accepte les <Link href="/terms" className="underline underline-offset-2">conditions d’utilisation</Link> et la <Link href="/privacy" className="underline underline-offset-2">politique de confidentialité</Link>.</span></label>
+      <label className="flex items-start gap-2 text-xs leading-5 text-zinc-600"><input type="checkbox" {...register("terms")} className="mt-1 accent-zinc-900" /><span>J’accepte les <Link href="/terms" className="underline underline-offset-2">conditions d’utilisation</Link>.</span></label>
       {fieldError("terms") && <p className="text-xs text-rose-700">{fieldError("terms")}</p>}
+      <label className="flex items-start gap-2 text-xs leading-5 text-zinc-600"><input type="checkbox" {...register("privacyNoticeAcknowledged")} className="mt-1 accent-zinc-900" /><span>J’ai lu la <Link href="/privacy" className="underline underline-offset-2">politique de confidentialité</Link> et compris comment mes données seront utilisées pour gérer mon compte.</span></label>
+      {fieldError("privacyNoticeAcknowledged") && <p className="text-xs text-rose-700">{fieldError("privacyNoticeAcknowledged")}</p>}
       <button type="submit" disabled={isSubmitting} className="group inline-flex h-12 w-full items-center justify-center gap-3 bg-zinc-950 px-5 text-xs font-semibold uppercase tracking-[0.13em] text-white transition hover:bg-zinc-700 disabled:cursor-wait disabled:opacity-50">{isSubmitting ? "Création du compte…" : "Créer mon compte"}<ArrowRight className="size-4 transition group-hover:translate-x-1" /></button>
     </form>
   </AuthShell>;

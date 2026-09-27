@@ -8,6 +8,7 @@ use App\Http\Requests\Boutique\Category\UpdateCategorieFormRequest;
 use App\Http\Requests\Category\StoreCategoryRequest;
 use App\Http\Requests\Category\UpdateCategoryRequest;
 use App\Repositories\Contracts\Categories\CategoryRepositoryInterface;
+use App\Services\Images\PublicImageOptimizer;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
@@ -17,10 +18,12 @@ class CategoryController extends Controller
 {
     //
     protected $categoryRepository;
+    protected PublicImageOptimizer $imageOptimizer;
 
-    public function __construct(CategoryRepositoryInterface $categoryRepository)
+    public function __construct(CategoryRepositoryInterface $categoryRepository, PublicImageOptimizer $imageOptimizer)
     {
         $this->categoryRepository = $categoryRepository;
+        $this->imageOptimizer = $imageOptimizer;
     }
 
     public function index()
@@ -57,7 +60,7 @@ class CategoryController extends Controller
             $data = $request->validated();
 
             if ($request->hasFile('image')) {
-                $data['image'] = $request->file('image')->store('categories', 'public');
+                $data['image'] = $this->imageOptimizer->storeUpload($request->file('image'), 'categories');
             }
 
             $category = $this->categoryRepository->create($data);
@@ -88,7 +91,7 @@ class CategoryController extends Controller
                 if ($category->image) {
                     Storage::disk('public')->delete($category->image);
                 }
-                $data['image'] = $request->file('image')->store('categories', 'public');
+                $data['image'] = $this->imageOptimizer->storeUpload($request->file('image'), 'categories');
             }
 
             $category = $this->categoryRepository->update($category, $data);

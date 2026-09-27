@@ -16,7 +16,7 @@ class Order extends Model
     protected $fillable = [
         'user_id', 'analytics_visitor_id', 'status', 'total', 'shipping_address', 'phone', 'notes',
         'payment_method', 'payment_status', 'payment_provider', 'payment_reference',
-        'payment_authorization_url', 'provider_transaction_id', 'paid_at',
+        'payment_authorization_url', 'provider_transaction_id', 'paid_at', 'sales_terms_accepted_at', 'sales_terms_version',
     ];
 
     protected function casts(): array
@@ -24,6 +24,7 @@ class Order extends Model
         return [
             'total' => 'decimal:2',
             'paid_at' => 'datetime',
+            'sales_terms_accepted_at' => 'datetime',
         ];
     }
 
