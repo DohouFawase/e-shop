@@ -93,6 +93,7 @@ export function EditProductForm({ productId }: { productId: string }) {
 
   const currentImages =
     product?.id === productId ? getImagePaths(product.images) : [];
+  const currentImageUrl = getStorageUrl(currentImages[0]);
 
   function updateField<K extends keyof ProductFormState>(
     key: K,
@@ -482,9 +483,9 @@ export function EditProductForm({ productId }: { productId: string }) {
             {files[0] ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={files[0].url} alt={files[0].file.name} className="max-h-[210px] max-w-[70%] object-contain" />
-            ) : currentImages[0] ? (
+            ) : currentImageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={getStorageUrl(currentImages[0])} alt="Image actuelle du produit" className="max-h-[210px] max-w-[70%] object-contain" />
+              <img src={currentImageUrl} alt="Image actuelle du produit" className="max-h-[210px] max-w-[70%] object-contain" />
             ) : (
               <div className="flex flex-col items-center gap-2 text-slate-400"><FileImage className="size-10" /><span className="text-sm">Aucune image sélectionnée</span></div>
             )}

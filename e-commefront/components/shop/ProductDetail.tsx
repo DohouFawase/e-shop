@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -30,6 +30,9 @@ import { addCartItem } from "@/store/cartSlice";
 import { toggleFavorite } from "@/store/favoriteSlice";
 import { animateProductToCart } from "@/lib/animate-product-to-cart";
 import { formatPrice, getImagePaths, getStorageUrl } from "@/lib/catalog";
+import type { Review } from "@/types/shop";
+
+const EMPTY_REVIEWS: Review[] = [];
 
 type ProductTab = "about" | "reviews" | "delivery" | "faq";
 
@@ -47,9 +50,11 @@ export function ProductDetail({
   const recommendedProducts = useAppSelector((state) => state.products.bestSellers);
   const newArrivals = useAppSelector((state) => state.products.newArrivals);
   const user = useAppSelector((state) => state.auth.user);
-  const reviews = useAppSelector((state) => state.reviews.byProductId[id] ?? []);
+  const reviews = useAppSelector((state) => state.reviews.byProductId[id] ?? EMPTY_REVIEWS);
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [previousImage, setPreviousImage] = useState<string | null>(null);
+  const imageTransitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [activeTab, setActiveTab] = useState<ProductTab>(reviewOrderItem ? "reviews" : "about");
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
@@ -68,6 +73,14 @@ export function ProductDetail({
     }
   }, [dispatch, id, product?.id, product?.category_id]);
 
+  useEffect(() => {
+    setSelectedImage(0);
+    setPreviousImage(null);
+    return () => {
+      if (imageTransitionTimer.current) clearTimeout(imageTransitionTimer.current);
+    };
+  }, [id]);
+
   if (!product || product.id !== id) {
     return (
       <main className="site-container min-h-[55vh] py-24 text-center text-sm text-zinc-500">
@@ -78,6 +91,17 @@ export function ProductDetail({
 
   const imagePaths = getImagePaths(product.images);
   const images = imagePaths.map((path) => getStorageUrl(path)).filter((url): url is string => Boolean(url));
+
+  function selectImage(index: number) {
+    if (index === selectedImage || !images[selectedImage] || !images[index]) return;
+    if (imageTransitionTimer.current) clearTimeout(imageTransitionTimer.current);
+    setPreviousImage(images[selectedImage]);
+    setSelectedImage(index);
+    imageTransitionTimer.current = setTimeout(() => {
+      setPreviousImage(null);
+      imageTransitionTimer.current = null;
+    }, 500);
+  }
   const sameCategoryProducts = relatedProducts.filter(
     (item) => item.id !== product.id && item.category_id === product.category_id,
   );
@@ -157,7 +181,7 @@ export function ProductDetail({
           {images.length > 1 && (
             <div className="order-2 flex gap-3 overflow-x-auto sm:order-1 sm:flex-col">
               {images.map((src, index) => (
-                <button key={`${src}-${index}`} type="button" onClick={() => setSelectedImage(index)} aria-label={`Afficher l’image ${index + 1}`} aria-pressed={selectedImage === index} className={`relative aspect-[3/4] w-[62px] shrink-0 overflow-hidden rounded-sm bg-zinc-100 sm:w-full ${selectedImage === index ? "ring-1 ring-zinc-900 ring-offset-2" : "opacity-70 hover:opacity-100"}`}>
+                <button key={`${src}-${index}`} type="button" onClick={() => selectImage(index)} aria-label={`Afficher l’image ${index + 1}`} aria-pressed={selectedImage === index} className={`relative aspect-[3/4] w-[62px] shrink-0 overflow-hidden rounded-sm bg-zinc-100 sm:w-full ${selectedImage === index ? "ring-1 ring-zinc-900 ring-offset-2" : "opacity-70 hover:opacity-100"}`}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={src} alt="" className="absolute inset-0 size-full object-cover" />
                 </button>
@@ -166,8 +190,14 @@ export function ProductDetail({
           )}
           <div className="relative order-1 aspect-[4/5] overflow-hidden bg-[#f4f2ed] sm:order-2">
             {images[selectedImage] ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={images[selectedImage]} alt={product.name} data-product-image={product.id} className="absolute inset-0 size-full object-cover" />
+              <>
+                {previousImage && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={previousImage} alt="" aria-hidden="true" className="absolute inset-0 z-10 size-full animate-out fade-out-0 duration-500 object-cover motion-reduce:animate-none" />
+                )}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img key={`${product.id}-${selectedImage}`} src={images[selectedImage]} alt={product.name} data-product-image={product.id} className="absolute inset-0 z-20 size-full animate-in fade-in-0 duration-500 object-cover motion-reduce:animate-none" />
+              </>
             ) : <div className="absolute inset-0 grid place-items-center font-serif text-7xl text-zinc-300">N.</div>}
             {hasDiscount && <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-900">Offre spéciale</span>}
           </div>

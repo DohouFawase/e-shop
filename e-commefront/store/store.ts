@@ -25,9 +25,11 @@ const appReducer = combineReducers({
   contactInbox: contactInboxReducer,
 });
 
+type RootState = ReturnType<typeof appReducer>;
+
 export const makeStore = () =>
   configureStore({
-    reducer: (state, action) => {
+    reducer: (state: RootState | undefined, action): RootState => {
       if (logoutUser.fulfilled.match(action) || logoutUser.rejected.match(action)) {
         state = undefined;
       }
@@ -38,5 +40,5 @@ export const makeStore = () =>
   });
 
 export type AppStore = ReturnType<typeof makeStore>;
-export type RootState = ReturnType<AppStore["getState"]>;
+export type { RootState };
 export type AppDispatch = AppStore["dispatch"];
