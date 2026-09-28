@@ -224,15 +224,17 @@ export function ProductDetail({
               <span className={`text-xs ${stockAvailable ? "text-emerald-700" : "text-rose-700"}`}>{stockAvailable ? `${product.stock_quantity} disponible${product.stock_quantity === 1 ? "" : "s"}` : "Rupture de stock"}</span>
             </div>
             <div className="mt-3 flex flex-col gap-3 sm:flex-row">
-              <div className="flex h-12 w-full items-center justify-between border border-zinc-900/15 px-3 sm:w-32">
+              <div className="flex h-12 w-full items-center justify-between border border-zinc-900/15 px-3 sm:w-32 sm:shrink-0">
                 <button type="button" aria-label="Diminuer la quantité" disabled={quantity <= 1} onClick={() => setQuantity((current) => Math.max(1, current - 1))} className="p-1 text-zinc-600 disabled:opacity-30"><Minus className="size-4" /></button>
                 <span aria-live="polite" className="text-sm tabular-nums">{quantity}</span>
                 <button type="button" aria-label="Augmenter la quantité" disabled={!stockAvailable || quantity >= product.stock_quantity} onClick={() => setQuantity((current) => Math.min(product.stock_quantity, current + 1))} className="p-1 text-zinc-600 disabled:opacity-30"><Plus className="size-4" /></button>
               </div>
-              <button type="button" onClick={() => void addToCart()} disabled={!stockAvailable || addingToCart} className="inline-flex h-12 flex-1 items-center justify-center gap-2 bg-zinc-950 px-5 text-xs font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:bg-zinc-400">
-                {addingToCart ? <LoaderCircle className="size-4 animate-spin" /> : <ShoppingBag className="size-4" />}{addingToCart ? "Ajout au panier…" : "Ajouter au panier"}
-              </button>
-              <button type="button" onClick={() => void favorite()} aria-label="Ajouter aux favoris" className="grid size-12 shrink-0 place-items-center border border-zinc-900/15 text-zinc-800 transition hover:border-zinc-900 hover:text-rose-600"><Heart className="size-5" /></button>
+              <div className="flex w-full min-w-0 gap-3 sm:flex-1">
+                <button type="button" onClick={() => void addToCart()} disabled={!stockAvailable || addingToCart} className="inline-flex h-12 min-w-0 flex-1 items-center justify-center gap-2 whitespace-nowrap bg-zinc-950 px-3 text-[10px] font-semibold uppercase tracking-[0.08em] text-white transition hover:bg-zinc-700 disabled:cursor-not-allowed disabled:bg-zinc-400 sm:px-5 sm:text-xs sm:tracking-[0.12em]">
+                  {addingToCart ? <LoaderCircle className="size-4 shrink-0 animate-spin" /> : <ShoppingBag className="size-4 shrink-0" />}{addingToCart ? "Ajout au panier…" : "Ajouter au panier"}
+                </button>
+                <button type="button" onClick={() => void favorite()} aria-label="Ajouter aux favoris" className="grid size-12 shrink-0 place-items-center border border-zinc-900/15 text-zinc-800 transition hover:border-zinc-900 hover:text-rose-600"><Heart className="size-5" /></button>
+              </div>
             </div>
           </div>
 
