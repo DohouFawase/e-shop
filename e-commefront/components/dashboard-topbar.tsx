@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Bell, CheckCheck, Clock3, Mail, Search, Sun, BellRing } from "lucide-react";
@@ -45,6 +45,8 @@ export function DashboardTopbar({
   const dispatch = useAppDispatch();
   const pathname = usePathname();
   const router = useRouter();
+  const routerRef = useRef(router);
+  routerRef.current = router;
   const authUser = useAppSelector((state) => state.auth.user);
   const isAdmin = authUser?.is_admin === true;
   const profileTimezone = useAppSelector((state) => state.profile.profile?.timezone);
@@ -175,7 +177,7 @@ export function DashboardTopbar({
           description: customer ? `Commande de ${customer}` : undefined,
           duration: 8000,
           action: orderUrl
-            ? { label: "Voir la commande", onClick: () => router.push(orderUrl) }
+            ? { label: "Voir la commande", onClick: () => routerRef.current.push(orderUrl) }
             : undefined,
         });
       });
@@ -190,7 +192,7 @@ export function DashboardTopbar({
         echo.disconnect();
       }
     };
-  }, [authUser?.id, isAdmin, refreshNotifications, router]);
+  }, [authUser?.id, isAdmin, refreshNotifications]);
 
   useEffect(() => {
     if (!isAdmin) return;

@@ -16,6 +16,17 @@ function decodeVapidKey(value: string): Uint8Array<ArrayBuffer> {
   return bytes;
 }
 
+function subscriptionUsesKey(
+  subscription: PushSubscription,
+  expectedKey: Uint8Array<ArrayBuffer>,
+): boolean {
+  const currentKey = subscription.options.applicationServerKey;
+  if (!currentKey || currentKey.byteLength !== expectedKey.byteLength) return false;
+
+  const currentBytes = new Uint8Array(currentKey);
+  return expectedKey.every((byte, index) => currentBytes[index] === byte);
+}
+
 function serializeSubscription(subscription: PushSubscription): PushSubscriptionPayload {
   const json = subscription.toJSON();
   if (!json.endpoint || !json.keys?.p256dh || !json.keys.auth) {
@@ -40,13 +51,21 @@ export const pushService = {
 
   async subscribe(): Promise<void> {
     const { data } = await api.get<VapidKeyResponse>("/notifications/push/vapid-public-key");
+    const applicationServerKey = decodeVapidKey(data.public_key);
     const permission = await Notification.requestPermission();
     if (permission !== "granted") throw new Error("Autorisez les notifications dans votre navigateur pour les recevoir.");
 
     const registration = await navigator.serviceWorker.register("/sw.js");
     await navigator.serviceWorker.ready;
-    const subscription = await registration.pushManager.getSubscription() ??
-      await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: decodeVapidKey(data.public_key) });
+    let subscription = await registration.pushManager.getSubscription();
+    if (subscription && !subscriptionUsesKey(subscription, applicationServerKey)) {
+      await subscription.unsubscribe();
+      subscription = null;
+    }
+    subscription ??= await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey,
+    });
     await api.post("/notifications/push/subscriptions", serializeSubscription(subscription));
   },
 

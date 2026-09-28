@@ -4,7 +4,10 @@ namespace App\Providers;
 
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Log;
+use NotificationChannels\WebPush\Events\NotificationFailed;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,6 +25,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Event::listen(NotificationFailed::class, function (NotificationFailed $event): void {
+            Log::warning('Échec de livraison Web Push', [
+                'user_id' => $event->subscription->subscribable_id,
+                'status_code' => $event->report->getResponse()?->getStatusCode(),
+                'reason' => $event->report->getReason(),
+            ]);
+        });
+
         Gate::define('viewApiDocs', function (?User $user): bool {
             return true;
         });
