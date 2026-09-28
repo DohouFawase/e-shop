@@ -3,8 +3,6 @@
 namespace App\Services\Payments;
 
 use App\Models\Boutique\Order;
-use App\Models\User;
-use App\Notifications\NewOrderPlaced;
 use App\Notifications\OrderPaymentStatusUpdated;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -156,9 +154,6 @@ class CinetPayPaymentService
 
         if ($justPaid) {
             $paidOrder->user?->notify(new OrderPaymentStatusUpdated($paidOrder, true));
-            User::where('is_admin', true)->get()->each(
-                fn (User $admin) => $admin->notify(new NewOrderPlaced($paidOrder)),
-            );
         }
 
         return ['status' => 'paid', 'order' => $paidOrder];

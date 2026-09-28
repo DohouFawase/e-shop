@@ -17,7 +17,7 @@ class OrderRepository implements OrderRepositoryInterface
 {
     public function createFromCart(User $user, array $data): Order
     {
-        return DB::transaction(function () use ($user, $data) {
+        $order = DB::transaction(function () use ($user, $data) {
             $cart = Cart::with('items.product')->where('user_id', $user->id)->first();
 
             if (! $cart || $cart->items->isEmpty()) {
@@ -76,14 +76,16 @@ class OrderRepository implements OrderRepositoryInterface
             }
 
             $cart->items()->delete();
-            if ($order->payment_method === 'cash_on_delivery') {
-                User::where('is_admin', true)->get()->each(function ($admin) use ($order) {
-                    $admin->notify(new NewOrderPlaced($order));
-                });
-            }
 
-            return $order->load('items');
+            return $order->load(['items', 'user']);
         });
+
+        // Notify admins after commit so realtime clients can fetch the saved notification.
+        User::where('is_admin', true)->get()->each(function (User $admin) use ($order) {
+            $admin->notify(new NewOrderPlaced($order));
+        });
+
+        return $order;
     }
 
     public function myOrders(User $user): LengthAwarePaginator

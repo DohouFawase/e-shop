@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import { fetchContactInbox } from "@/store/contactInboxSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { pushService } from "@/services/notifications/pushService";
+import { getAccessToken } from "@/config/config";
+import { API_BASE_URL } from "@/lib/api-url";
 import {
   notificationService,
   type AdminNotification,
@@ -43,7 +45,8 @@ export function DashboardTopbar({
   const dispatch = useAppDispatch();
   const pathname = usePathname();
   const router = useRouter();
-  const isAdmin = useAppSelector((state) => state.auth.user?.is_admin === true);
+  const authUser = useAppSelector((state) => state.auth.user);
+  const isAdmin = authUser?.is_admin === true;
   const profileTimezone = useAppSelector((state) => state.profile.profile?.timezone);
   const localTimezone = profileTimezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
   const unreadMessages = useAppSelector((state) => state.contactInbox.unreadCount);
@@ -121,6 +124,73 @@ export function DashboardTopbar({
       setPushBusy(false);
     }
   }
+
+  useEffect(() => {
+    const token = getAccessToken();
+    const host = process.env.NEXT_PUBLIC_REVERB_HOST;
+    const key = process.env.NEXT_PUBLIC_REVERB_APP_KEY;
+    if (!isAdmin || !authUser?.id || !token || !host || !key) return;
+
+    let echo: import("laravel-echo").default<"reverb"> | undefined;
+    let cancelled = false;
+    const channelName = `App.Models.User.${authUser.id}`;
+
+    void Promise.all([import("laravel-echo"), import("pusher-js")]).then(([echoModule, pusherModule]) => {
+      if (cancelled) return;
+      const Pusher = pusherModule.default;
+      (window as Window & { Pusher?: typeof Pusher }).Pusher = Pusher;
+      const Echo = echoModule.default;
+      const secure = process.env.NEXT_PUBLIC_REVERB_SCHEME !== "http";
+      const port = Number(process.env.NEXT_PUBLIC_REVERB_PORT || (secure ? 443 : 80));
+      echo = new Echo({
+        broadcaster: "reverb",
+        key,
+        wsHost: host,
+        wsPort: port,
+        wssPort: port,
+        forceTLS: secure,
+        enabledTransports: ["ws", "wss"],
+        authEndpoint: `${API_BASE_URL.replace(/\/+$/, "")}/broadcasting/auth`,
+        auth: {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        },
+      });
+      echo.private(channelName).notification((notification: Record<string, unknown>) => {
+        void refreshNotifications();
+        const message = typeof notification.message === "string"
+          ? notification.message
+          : "Nouvelle notification reçue.";
+        const customer = typeof notification.customer_name === "string"
+          ? notification.customer_name
+          : undefined;
+        const orderId = notification.order_id;
+        const orderUrl = orderId !== undefined
+          ? `/dashboard/orders/${encodeURIComponent(String(orderId))}`
+          : undefined;
+
+        toast(message, {
+          description: customer ? `Commande de ${customer}` : undefined,
+          duration: 8000,
+          action: orderUrl
+            ? { label: "Voir la commande", onClick: () => router.push(orderUrl) }
+            : undefined,
+        });
+      });
+    }).catch(() => {
+      // L’interface garde les notifications consultables via le chargement périodique.
+    });
+
+    return () => {
+      cancelled = true;
+      if (echo) {
+        echo.leave(channelName);
+        echo.disconnect();
+      }
+    };
+  }, [authUser?.id, isAdmin, refreshNotifications, router]);
 
   useEffect(() => {
     if (!isAdmin) return;
