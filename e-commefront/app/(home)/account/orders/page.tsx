@@ -143,7 +143,7 @@ export default function OrdersPage() {
         <div className="space-y-10">
           {orders.map((order) => {
             const cinetpayUnpaid = order.payment_method === "cinetpay" && order.payment_status !== "paid";
-            const canCancel = order.status === "pending" && (!cinetpayUnpaid || order.payment_status === "failed");
+            const canCancel = order.status === "pending" && order.payment_method !== "cinetpay";
             const expanded = expandedOrders.includes(order.id);
             return (
               <article key={order.id} className="border-y border-zinc-900/10">

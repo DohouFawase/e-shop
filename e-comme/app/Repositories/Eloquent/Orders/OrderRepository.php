@@ -110,10 +110,12 @@ class OrderRepository implements OrderRepositoryInterface
                 ]);
             }
 
-            if ($order->payment_method === 'cinetpay' && $order->payment_status === 'pending') {
-                throw ValidationException::withMessages([
-                    'payment' => ['Vérifie ou termine le paiement avant d’annuler cette commande.'],
-                ]);
+            if ($order->payment_method === 'cinetpay') {
+                $message = $order->payment_status === 'paid'
+                    ? 'Rembourse d’abord le paiement CinetPay avant d’annuler cette commande.'
+                    : 'La commande reste en attente tant que le paiement CinetPay n’est pas confirmé. Tu peux reprendre le paiement depuis tes commandes.';
+
+                throw ValidationException::withMessages(['payment' => [$message]]);
             }
 
             foreach ($order->items as $item) {
@@ -147,15 +149,12 @@ class OrderRepository implements OrderRepositoryInterface
                 'payment' => ['Cette commande ne peut être traitée qu’après confirmation du paiement.'],
             ]);
         }
-        if ($order->payment_method === 'cinetpay' && $order->payment_status === 'pending' && $status === 'cancelled') {
-            throw ValidationException::withMessages([
-                'payment' => ['Vérifie ou termine le paiement avant d’annuler cette commande.'],
-            ]);
-        }
-        if ($order->payment_method === 'cinetpay' && $order->payment_status === 'paid' && $status === 'cancelled') {
-            throw ValidationException::withMessages([
-                'payment' => ['Rembourse d’abord le paiement CinetPay avant d’annuler cette commande.'],
-            ]);
+        if ($order->payment_method === 'cinetpay' && $status === 'cancelled') {
+            $message = $order->payment_status === 'paid'
+                ? 'Rembourse d’abord le paiement CinetPay avant d’annuler cette commande.'
+                : 'La commande reste en attente tant que le paiement CinetPay n’est pas confirmé.';
+
+            throw ValidationException::withMessages(['payment' => [$message]]);
         }
         if ($status === 'cancelled' && ! $wasCancelled) {
             foreach ($order->items as $item) {
