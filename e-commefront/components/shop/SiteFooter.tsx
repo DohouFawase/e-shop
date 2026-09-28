@@ -49,7 +49,7 @@ export function SiteFooter() {
         </div>
         <div className="flex flex-col gap-3 pt-6 text-xs text-[#7c837a] sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} Naya. Tous droits réservés.</p>
-          <p>Design et développement par <span className="font-semibold text-[#526250]">Fawase Dohou</span></p>
+          <p>Design et développement par <span className="font-semibold text-[#526250]">Geodaftar</span></p>
           <Link href="/shop" className="inline-flex items-center gap-1 font-semibold text-[#526250] transition hover:text-[#a45a3d]">Fait pour les belles découvertes <ArrowUpRight className="size-3.5" /></Link>
         </div>
       </div>
