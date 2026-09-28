@@ -6,7 +6,7 @@ type PaymentLink = { payment?: { authorization_url: string; reference: string };
 
 export const paymentService = {
   async verify(reference: string): Promise<PaymentResult> {
-    const { data } = await api.post<PaymentResult>("/payments/cinetpay/verify", { reference });
+    const { data } = await api.post<PaymentResult>("/payments/verify", { reference });
     return data;
   },
 

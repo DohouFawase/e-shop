@@ -27,7 +27,7 @@ class StoreOrderRequest extends FormRequest
             'shipping_address' => ['required', 'string', 'max:500'],
             'phone' => ['required', 'string', 'max:20'],
             'notes' => ['nullable', 'string', 'max:1000'],
-            'payment_method' => ['nullable', 'in:cash_on_delivery,cinetpay'],
+            'payment_method' => ['nullable', 'in:cash_on_delivery,cinetpay,paystack'],
             'sales_terms_accepted' => ['required', 'accepted'],
         ];
     }

@@ -61,7 +61,7 @@ export default function OrdersPage() {
           return;
         }
         if (verification.status === "pending") {
-          setPaymentNotice("CinetPay traite encore le paiement. Vérifie à nouveau dans quelques instants.");
+          setPaymentNotice("Le prestataire traite encore le paiement. Vérifie à nouveau dans quelques instants.");
           return;
         }
       }
@@ -142,8 +142,8 @@ export default function OrdersPage() {
       ) : (
         <div className="space-y-10">
           {orders.map((order) => {
-            const cinetpayUnpaid = order.payment_method === "cinetpay" && order.payment_status !== "paid";
-            const canCancel = order.status === "pending" && order.payment_method !== "cinetpay";
+            const onlinePaymentUnpaid = (order.payment_method === "cinetpay" || order.payment_method === "paystack") && order.payment_status !== "paid";
+            const canCancel = order.status === "pending" && order.payment_method !== "cinetpay" && order.payment_method !== "paystack";
             const expanded = expandedOrders.includes(order.id);
             return (
               <article key={order.id} className="border-y border-zinc-900/10">
@@ -196,11 +196,11 @@ export default function OrdersPage() {
 
                 {expanded && <section id={`order-detail-${order.id}`} className="grid gap-5 border-t border-zinc-900/10 bg-zinc-50/60 px-4 py-5 sm:grid-cols-2 sm:px-6">
                   <div><h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Livraison</h3><p className="mt-2 text-sm text-zinc-800">{order.shipping_address}</p><p className="mt-1 text-sm text-zinc-600">{order.phone}</p>{order.notes && <p className="mt-2 text-xs leading-5 text-zinc-500">Note : {order.notes}</p>}</div>
-                  <div><h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Paiement et total</h3><p className="mt-2 text-sm text-zinc-800">{order.payment_method === "cinetpay" ? "CinetPay" : "Paiement à la livraison"} · {paymentLabels[order.payment_status ?? "unpaid"] ?? "À régler"}</p><p className="mt-1 text-sm text-zinc-600">Commande passée le {dateOnly.format(new Date(order.created_at))}</p><p className="mt-2 text-sm font-semibold text-zinc-950">Total : {formatPrice(order.total)}</p></div>
+                  <div><h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Paiement et total</h3><p className="mt-2 text-sm text-zinc-800">{order.payment_method === "paystack" ? "Paystack" : order.payment_method === "cinetpay" ? "CinetPay" : "Paiement à la livraison"} · {paymentLabels[order.payment_status ?? "unpaid"] ?? "À régler"}</p><p className="mt-1 text-sm text-zinc-600">Commande passée le {dateOnly.format(new Date(order.created_at))}</p><p className="mt-2 text-sm font-semibold text-zinc-950">Total : {formatPrice(order.total)}</p></div>
                 </section>}
 
-                {(cinetpayUnpaid || canCancel) && <footer className="flex flex-wrap gap-5 border-t border-zinc-900/10 py-4">
-                  {cinetpayUnpaid && order.status !== "cancelled" && <button type="button" disabled={busyOrder === order.id} onClick={() => void continuePayment(order)} className="text-sm font-medium text-zinc-900 underline underline-offset-4 disabled:opacity-50">{busyOrder === order.id ? "Vérification…" : order.payment_status === "pending" ? "Vérifier / continuer le paiement" : "Réessayer le paiement CinetPay"}</button>}
+                {(onlinePaymentUnpaid || canCancel) && <footer className="flex flex-wrap gap-5 border-t border-zinc-900/10 py-4">
+                  {onlinePaymentUnpaid && order.status !== "cancelled" && <button type="button" disabled={busyOrder === order.id} onClick={() => void continuePayment(order)} className="text-sm font-medium text-zinc-900 underline underline-offset-4 disabled:opacity-50">{busyOrder === order.id ? "Vérification…" : order.payment_status === "pending" ? "Vérifier / continuer le paiement" : order.payment_method === "paystack" ? "Réessayer le paiement Paystack" : "Réessayer le paiement CinetPay"}</button>}
                   {canCancel && <button type="button" disabled={busyOrder === order.id} onClick={() => void cancelUnpaidOrder(order)} className="text-sm font-medium text-red-700 underline underline-offset-4 disabled:opacity-50">Annuler cette commande</button>}
                 </footer>}
               </article>

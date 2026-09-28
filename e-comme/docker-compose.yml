@@ -14,6 +14,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:?Define JWT_SECRET dans les variables Dokploy}
       APP_URL: ${APP_URL:?Define APP_URL dans les variables Dokploy}
       FRONTEND_URL: ${FRONTEND_URL:?Define FRONTEND_URL dans les variables Dokploy}
+      PAYSTACK_SECRET_KEY: ${PAYSTACK_SECRET_KEY:-}
       BROADCAST_CONNECTION: reverb
       REVERB_APP_ID: ${REVERB_APP_ID:?Define REVERB_APP_ID dans les variables Dokploy}
       REVERB_APP_KEY: ${REVERB_APP_KEY:?Define REVERB_APP_KEY dans les variables Dokploy}

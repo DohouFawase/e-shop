@@ -19,6 +19,10 @@ return [
         'site_id' => env('CINETPAY_SITE_ID'),
     ],
 
+    'paystack' => [
+        'secret_key' => env('PAYSTACK_SECRET_KEY'),
+    ],
+
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

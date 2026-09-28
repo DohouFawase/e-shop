@@ -4,7 +4,7 @@ export const createOrderSchema = z.object({
   shipping_address: z.string().trim().min(1, "L’adresse de livraison est requise.").max(500),
   phone: z.string().trim().min(1, "Le téléphone est requis.").max(20),
   notes: z.string().max(1000).nullable().optional(),
-  payment_method: z.enum(['cash_on_delivery', 'cinetpay']).optional(),
+  payment_method: z.enum(['cash_on_delivery', 'cinetpay', 'paystack']).optional(),
   sales_terms_accepted: z.literal(true, { error: "Vous devez accepter les conditions générales de vente." }),
 });
 

@@ -63,7 +63,7 @@ export interface Order {
   user_id: string;
   user?: { id: string; first_name: string; last_name: string; email?: string };
   status: OrderStatus;
-  payment_method?: 'cash_on_delivery' | 'cinetpay';
+  payment_method?: 'cash_on_delivery' | 'cinetpay' | 'paystack';
   payment_status?: 'unpaid' | 'pending' | 'paid' | 'failed';
   payment_provider?: string | null;
   payment_reference?: string | null;

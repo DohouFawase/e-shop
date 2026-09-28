@@ -7,6 +7,7 @@ use App\Http\Requests\Order\StoreOrderRequest;
 use App\Http\Requests\Order\UpdateOrderStatusRequest;
 use App\Repositories\Contracts\Orders\OrderRepositoryInterface;
 use App\Services\Payments\CinetPayPaymentService;
+use App\Services\Payments\PaystackPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -22,7 +23,7 @@ class OrderController extends Controller
         $this->orderRepository = $orderRepository;
     }
 
-    public function store(StoreOrderRequest $request)
+    public function store(StoreOrderRequest $request, CinetPayPaymentService $cinetPay, PaystackPaymentService $paystack)
     {
         try {
             $orderData = $request->validated();
@@ -34,14 +35,20 @@ class OrderController extends Controller
             $payment = null;
             $paymentError = null;
 
-            if (($orderData['payment_method'] ?? 'cash_on_delivery') === 'cinetpay') {
+            $paymentMethod = $orderData['payment_method'] ?? 'cash_on_delivery';
+            if (in_array($paymentMethod, ['cinetpay', 'paystack'], true)) {
                 try {
-                    $payment = app(CinetPayPaymentService::class)->initialize($order);
+                    $payment = $paymentMethod === 'paystack'
+                        ? $paystack->initialize($order)
+                        : $cinetPay->initialize($order);
                     $order->refresh();
                 } catch (Throwable $paymentException) {
                     $order->forceFill(['payment_status' => 'failed'])->save();
                     $paymentError = $paymentException->getMessage();
-                    Log::warning('Initialisation CinetPay impossible', ['order_id' => $order->id]);
+                    Log::warning('Initialisation du paiement en ligne impossible', [
+                        'order_id' => $order->id,
+                        'provider' => $paymentMethod,
+                    ]);
                 }
             }
 

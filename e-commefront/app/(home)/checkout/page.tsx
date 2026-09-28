@@ -11,7 +11,7 @@ import { orderService } from "@/services/orders/orderService";
 import { fetchCart, removeCartItem, updateCartItem } from "@/store/cartSlice";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 
-type PaymentMethod = "cinetpay" | "cash_on_delivery";
+type PaymentMethod = "cinetpay" | "paystack" | "cash_on_delivery";
 
 const inputClass = "mt-2 block h-12 w-full rounded-full border border-zinc-300 bg-white px-4 text-sm text-zinc-950 outline-none transition placeholder:text-zinc-400 focus:border-zinc-700 focus:ring-2 focus:ring-zinc-100";
 
@@ -46,7 +46,7 @@ export default function CheckoutPage() {
         sales_terms_accepted: true,
       });
 
-      if (paymentMethod === "cinetpay") {
+      if (paymentMethod !== "cash_on_delivery") {
         if (result.payment?.authorization_url) {
           window.location.assign(result.payment.authorization_url);
           return;
@@ -130,6 +130,11 @@ export default function CheckoutPage() {
                 <input type="radio" name="payment-method" value="cinetpay" checked={paymentMethod === "cinetpay"} onChange={() => setPaymentMethod("cinetpay")} className="mt-1 size-4 accent-zinc-900" />
                 <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-zinc-700 ring-1 ring-zinc-200"><CreditCard className="size-4" /></span>
                 <span className="flex-1"><span className="block text-sm font-medium text-zinc-950">Paiement sécurisé en ligne</span><span className="mt-1 block text-xs leading-5 text-zinc-500">Carte bancaire ou paiement mobile disponible via CinetPay, selon les moyens activés.</span></span>
+              </label>
+              <label className={`flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition ${paymentMethod === "paystack" ? "border-zinc-900 bg-zinc-50" : "border-zinc-200 hover:border-zinc-400"}`}>
+                <input type="radio" name="payment-method" value="paystack" checked={paymentMethod === "paystack"} onChange={() => setPaymentMethod("paystack")} className="mt-1 size-4 accent-zinc-900" />
+                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-zinc-700 ring-1 ring-zinc-200"><CreditCard className="size-4" /></span>
+                <span className="flex-1"><span className="block text-sm font-medium text-zinc-950">Paystack</span><span className="mt-1 block text-xs leading-5 text-zinc-500">Paiement sécurisé par carte bancaire et autres moyens proposés par Paystack.</span></span>
               </label>
               <label className={`flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition ${paymentMethod === "cash_on_delivery" ? "border-zinc-900 bg-zinc-50" : "border-zinc-200 hover:border-zinc-400"}`}>
                 <input type="radio" name="payment-method" value="cash_on_delivery" checked={paymentMethod === "cash_on_delivery"} onChange={() => setPaymentMethod("cash_on_delivery")} className="mt-1 size-4 accent-zinc-900" />

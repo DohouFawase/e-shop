@@ -52,7 +52,7 @@ class OrderRepository implements OrderRepositoryInterface
                 'analytics_visitor_id' => $data['analytics_visitor_id'] ?? null,
                 'status' => 'pending',
                 'payment_method' => $data['payment_method'] ?? 'cash_on_delivery',
-                'payment_status' => ($data['payment_method'] ?? 'cash_on_delivery') === 'cinetpay' ? 'pending' : 'unpaid',
+                'payment_status' => in_array(($data['payment_method'] ?? 'cash_on_delivery'), ['cinetpay', 'paystack'], true) ? 'pending' : 'unpaid',
                 'total' => $total,
                 'shipping_address' => $data['shipping_address'],
                 'phone' => $data['phone'],
@@ -110,10 +110,10 @@ class OrderRepository implements OrderRepositoryInterface
                 ]);
             }
 
-            if ($order->payment_method === 'cinetpay') {
+            if (in_array($order->payment_method, ['cinetpay', 'paystack'], true)) {
                 $message = $order->payment_status === 'paid'
-                    ? 'Rembourse d’abord le paiement CinetPay avant d’annuler cette commande.'
-                    : 'La commande reste en attente tant que le paiement CinetPay n’est pas confirmé. Tu peux reprendre le paiement depuis tes commandes.';
+                    ? 'Rembourse d’abord le paiement en ligne avant d’annuler cette commande.'
+                    : 'La commande reste en attente tant que le paiement en ligne n’est pas confirmé. Tu peux reprendre le paiement depuis tes commandes.';
 
                 throw ValidationException::withMessages(['payment' => [$message]]);
             }
@@ -144,15 +144,15 @@ class OrderRepository implements OrderRepositoryInterface
     public function updateStatus(Order $order, string $status): Order
     {
         $wasCancelled = $order->status === 'cancelled';
-        if ($order->payment_method === 'cinetpay' && $order->payment_status !== 'paid' && $status !== 'cancelled') {
+        if (in_array($order->payment_method, ['cinetpay', 'paystack'], true) && $order->payment_status !== 'paid' && $status !== 'cancelled') {
             throw ValidationException::withMessages([
                 'payment' => ['Cette commande ne peut être traitée qu’après confirmation du paiement.'],
             ]);
         }
-        if ($order->payment_method === 'cinetpay' && $status === 'cancelled') {
+        if (in_array($order->payment_method, ['cinetpay', 'paystack'], true) && $status === 'cancelled') {
             $message = $order->payment_status === 'paid'
-                ? 'Rembourse d’abord le paiement CinetPay avant d’annuler cette commande.'
-                : 'La commande reste en attente tant que le paiement CinetPay n’est pas confirmé.';
+                ? 'Rembourse d’abord le paiement en ligne avant d’annuler cette commande.'
+                : 'La commande reste en attente tant que le paiement en ligne n’est pas confirmé.';
 
             throw ValidationException::withMessages(['payment' => [$message]]);
         }
