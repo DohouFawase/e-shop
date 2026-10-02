@@ -65,7 +65,9 @@ class ProductRepository implements ProductRepositoryInterface
 
         $query->orderBy($sortBy, $sortDirection === 'asc' ? 'asc' : 'desc');
 
-        return $query->paginate($filters['per_page'] ?? 15);
+        $perPage = min(100, max(1, (int) ($filters['per_page'] ?? 15)));
+
+        return $query->paginate($perPage);
     }
 
     public function find(string $id): ?Product

@@ -40,7 +40,9 @@ class ReviewRepository implements ReviewRepositoryInterface
             });
         }
 
-        return $query->orderByDesc('created_at')->paginate($filters['per_page'] ?? 15);
+        $perPage = min(100, max(1, (int) ($filters['per_page'] ?? 15)));
+
+        return $query->orderByDesc('created_at')->paginate($perPage);
     }
 
     public function find(string $id): ?Review

@@ -138,7 +138,9 @@ class OrderRepository implements OrderRepositoryInterface
             $query->where('status', $filters['status']);
         }
 
-        return $query->orderBy('created_at', 'desc')->paginate($filters['per_page'] ?? 15);
+        $perPage = min(100, max(1, (int) ($filters['per_page'] ?? 15)));
+
+        return $query->orderBy('created_at', 'desc')->paginate($perPage);
     }
 
     public function updateStatus(Order $order, string $status): Order
